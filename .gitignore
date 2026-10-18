@@ -1,0 +1,16 @@
+# Local secrets
+backend/src/main/resources/application-local.yml
+
+# Database scripts (contain credentials)
+db/
+
+# Build outputs
+backend/target/
+frontend/node_modules/
+frontend/dist/
+
+# IDE / internal
+.idea/
+*.iml
+.superpowers/
+.claude/setting.loacl.json
