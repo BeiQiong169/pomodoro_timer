@@ -1,5 +1,6 @@
 package com.pomodoro.dto.auth;
 
+import com.pomodoro.validation.MaxBytes;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
@@ -9,6 +10,7 @@ public record RegisterRequest(
         String username,
 
         @NotBlank(message = "密码不能为空")
-        @Size(min = 6, max = 72, message = "密码长度需为 6-72 个字符")
+        @Size(min = 6, message = "密码至少 6 个字符")
+        @MaxBytes(value = 72, message = "密码不能超过 72 字节")
         String password) {
 }

@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pomodoro.mapper.UserMapper;
 import com.pomodoro.model.UserRow;
 import jakarta.servlet.http.Cookie;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -110,6 +111,52 @@ class AuthFlowIntegrationTest {
                                 """))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("用户名不能为空"));
+    }
+
+    @Test
+    void registerRejectsPasswordOver72Bytes() throws Exception {
+        Csrf csrf = fetchCsrf();
+
+        mockMvc.perform(post("/api/auth/register")
+                        .cookie(csrf.cookie())
+                        .header(CSRF_HEADER, csrf.token())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                Map.of("username", "alice", "password", "番".repeat(25)))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("密码不能超过 72 字节"));
+    }
+
+    @Test
+    void registerAcceptsPasswordAtByteLimit() throws Exception {
+        when(userMapper.insert(any(UserRow.class))).thenAnswer(invocation -> {
+            UserRow user = invocation.getArgument(0);
+            user.setId(1L);
+            return 1;
+        });
+        Csrf csrf = fetchCsrf();
+
+        mockMvc.perform(post("/api/auth/register")
+                        .cookie(csrf.cookie())
+                        .header(CSRF_HEADER, csrf.token())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                Map.of("username", "alice", "password", "番".repeat(24)))))
+                .andExpect(status().isCreated());
+    }
+
+    @Test
+    void loginRejectsPasswordOver72Bytes() throws Exception {
+        Csrf csrf = fetchCsrf();
+
+        mockMvc.perform(post("/api/auth/login")
+                        .cookie(csrf.cookie())
+                        .header(CSRF_HEADER, csrf.token())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                Map.of("username", "alice", "password", "番".repeat(25)))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("密码不能超过 72 字节"));
     }
 
     @Test
