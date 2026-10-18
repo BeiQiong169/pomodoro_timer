@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pomodoro.mapper.PomodoroSessionMapper">
+
+    <resultMap id="PomodoroSessionRowMap" type="com.pomodoro.model.PomodoroSessionRow">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="taskId" column="task_id"/>
+        <result property="clientToken" column="client_token"/>
+        <result property="durationMinutes" column="duration_minutes"/>
+        <result property="completedAt" column="completed_at"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO pomodoro_session (user_id, task_id, client_token, duration_minutes, completed_at)
+        VALUES (#{userId}, #{taskId,jdbcType=BIGINT}, #{clientToken},
+                #{durationMinutes}, #{completedAt,jdbcType=TIMESTAMP})
+    </insert>
+
+    <select id="findByUserIdAndClientToken" resultMap="PomodoroSessionRowMap">
+        SELECT id, user_id, task_id, client_token, duration_minutes, completed_at, created_at
+        FROM pomodoro_session
+        WHERE user_id = #{userId} AND client_token = #{clientToken}
+    </select>
+</mapper>

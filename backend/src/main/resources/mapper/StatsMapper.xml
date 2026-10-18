@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pomodoro.mapper.StatsMapper">
+
+    <resultMap id="TodayStatRowMap" type="com.pomodoro.model.TodayStatRow">
+        <result property="pomodoroCount" column="pomodoro_count"/>
+        <result property="focusMinutes" column="focus_minutes"/>
+    </resultMap>
+
+    <resultMap id="DailyStatRowMap" type="com.pomodoro.model.DailyStatRow">
+        <result property="statDate" column="stat_date"/>
+        <result property="pomodoroCount" column="pomodoro_count"/>
+    </resultMap>
+
+    <select id="findTodayPomodoroStat" resultMap="TodayStatRowMap">
+        SELECT COUNT(*) AS pomodoro_count,
+               COALESCE(SUM(duration_minutes), 0) AS focus_minutes
+        FROM pomodoro_session
+        WHERE user_id = #{userId}
+          AND completed_at &gt;= #{start}
+          AND completed_at &lt; #{end}
+    </select>
+
+    <select id="countCompletedTasks" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM task
+        WHERE user_id = #{userId}
+          AND completed = TRUE
+          AND completed_at &gt;= #{start}
+          AND completed_at &lt; #{end}
+    </select>
+
+    <select id="findDailyPomodoroCounts" resultMap="DailyStatRowMap">
+        SELECT DATE(completed_at) AS stat_date,
+               COUNT(*) AS pomodoro_count
+        FROM pomodoro_session
+        WHERE user_id = #{userId}
+          AND completed_at &gt;= #{start}
+          AND completed_at &lt; #{end}
+        GROUP BY DATE(completed_at)
+        ORDER BY DATE(completed_at)
+    </select>
+</mapper>
