@@ -52,6 +52,12 @@ public class ApiExceptionHandler {
         return new ApiError("用户名或密码错误");
     }
 
+    @ExceptionHandler(NotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ApiError handleMissingEntity(NotFoundException ex) {
+        return new ApiError(ex.getMessage());
+    }
+
     @ExceptionHandler(NoResourceFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ApiError handleNotFound(NoResourceFoundException ex) {
